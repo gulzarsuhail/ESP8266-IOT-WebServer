@@ -31,7 +31,7 @@ const char* password = STAPSK;
  * To change the GPIO pin numbers, follow format
  * const int relayPINS[8] = {PinOneNum, PinTwoNum, PinThreeNum, ..., PinEightNum};
  */
-const int relayPINS[8] = {5,4,0,2,14,12,13,15};
+const int relayPINS[8] = {5,4,0,14,12,13,15,3}; // {D1, D2, D3, D5, D6, D7, D8, RX}
 
 /*
  * The name of the devices connected to each GPIO pin.
@@ -59,7 +59,7 @@ const String deviceName[8] = {
  * The order of these values directly corresponds to the GPIO
  * pins in the relayPINS array
  */
-int relayPINSstatus[8] = {0, 0, 0, 0, 1, 0, 1, 1};
+int relayPINSstatus[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 
 /*
@@ -158,50 +158,63 @@ void handleRoot(){
   Serial.print("Recieved root GET request... ");
   String page = "<!DOCTYPE html><html lang='en'><head> <meta charset='UTF-8'> \
   <meta name='viewport' content='width=device-width, initial-scale=1.0'> \
-  <meta http-equiv='X-UA-Compatible' content='ie=edge'> <title>ESP8266 Control Panel\
-  </title> <style>*{padding: 0; margin: 0; font-family: Helvetica, Arial, \
+  <meta http-equiv='X-UA-Compatible' content='ie=edge'> <title>ESP8266 Control \
+  Panel</title> <style>*{padding: 0; margin: 0; font-family: Helvetica, Arial, \
   sans-serif;}html, body{min-height: 100% !important; height: 100%;}body{background: \
-  #252525; display: flex; flex-direction: column;}#loader{z-index: 100; position: \
-  absolute; width: 100%; height: 100%; background: #252525; display: flex; color: \
-  white; align-items: center; transition: all 0.5s linear;}#loader span{margin: 0 \
-  auto;}.container{max-width: 900px; margin: 0 auto;}header{background: rgb(20, 20, \
-  20); padding: 10px; color: white; align-content: center; box-shadow: 0 8px 6px \
-  -6px black; flex-grow: 0;}header div{display: flex; justify-content: space-around;}.\
-  logo{font-weight: 200; display: inline-block; cursor: pointer; font-style: italic; \
-  font-size: 1.5em;}.switchboard{flex-grow: 1; display: flex; flex-direction: row; \
-  align-items: center;}.summary{display: flex; flex-direction: row; padding: 20px; \
-  flex-wrap: wrap; align-items: center; justify-content: center;}.device{flex-basis: \
-  250px; background: rgba(0, 0, 0, 0.7); padding: 20px; margin: 20px; transition: \
-  background 0.25s linear; position: relative; box-shadow: 0 8px 6px -6px black; \
-  cursor: pointer; color: white;}.device:hover{top: 1px; background: rgba(0, 0, 0, \
-  0.8); box-shadow: 0 4px 6px -6px black;}.device:active{top: 4px; box-shadow: none;}\
-  .device .name{font-size: 1.1em; pointer-events: none;}.device .pin{font-style: italic; \
-  font-size: 0.8em; margin: 10px 0px; pointer-events: none;}.on{background-color: \
-  rgba(255, 255, 0, 1); color: black;}.on:hover{background-color: rgba(255, 255, 0, \
-  0.9);}h1, h2{text-align: center;}@media only screen and (max-width: 800px){.device{margin: \
-  5px;}.summary{padding: 0px;}}@media only screen and (max-width: 650px){.device{margin: \
-  10px 5px; flex-basis: 300px;}.summary{padding: 0px;}}</style></head><body> <div id='loader'> \
-  <span> <span class='logo'>nodemcu |</span> <span>loading...</span> </span> </div><header> \
-  <div class='container'> <span> <span class='logo'>nodemcu |</span> <span>control panel</span> \
-  </span> </div></header> <section class='container switchboard'> <div class='summary' id='pins'>\
-  </div></section></body><script type='text/javascript'> getPinState=new Promise( \
-  ((resolve, reject)=>{fetch('/status').then(res=>{if (res.status !==200) throw new Error \
-  (res.status); else resolve(res.json())}).catch(err=> reject('An error occured while \
-  fetching data'))}) ); function addDevices(pinState){let str=''; pinState.forEach(pin=>\
-  {str +='<span class=\"device '; str +=(pin.pinStatus==1)?\"on\":\"\"; str +='\" pinno='\
-  + pin.pinNumber +'><div class=\"name\">' + pin.deviceName + '</div><div class=\"pin\">\
-  GPIO<span class=\"no\">' + pin.pinNumber + '</span></div></span>';}); document.getElementById\
-  ('pins').innerHTML=str;}function changePinState(pinEle){let sendArgs='pinNumber='+Number\
-  (pinEle.getAttribute('pinno'))+\"&state=\"; sendArgs +=pinEle.classList.contains('on')?0:1; \
-  fetch('/status',{method: 'POST', body: sendArgs, headers:{'Content-Type' : \
-  'application/x-www-form-urlencoded'}}).then((res)=>{if (res.status !==200) throw new Error \
-  (res.status);}).catch((err)=>{error(err);}); pinEle.classList.toggle('on');}function error(err)\
-  {document.getElementById('loader').innerHTML='<span><h2>Error occured while communicating to nodemcu.\
-  <h3><br><h1>RELOADING</h3></span>'; console.log(err); document.getElementById('loader').style.display=\
-  'flex';window.setInterval(()=>{location.reload();}, 1000);}window.onload=()=>{getPinState.then\
-  (pinState=>{addDevices(pinState); document.getElementById('loader').style.display='none';})\
-  .catch(err=>{error();}); document.addEventListener('click',function(e){if(e.target && e.target.\
-  classList.contains('device')){changePinState(e.target);}});}</script></html>";
+  #252525; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: \
+  vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: \
+  column;}#loader{z-index: 100; position: absolute; width: 100%; height: 100%; background: \
+  #252525; display: -webkit-box; display: -ms-flexbox; display: flex; color: white; \
+  -webkit-box-align: center; -ms-flex-align: center; align-items: center; -webkit-transition: \
+  all 0.5s linear; transition: all 0.5s linear;}#loader span{margin: 0 auto;}.container\
+  {max-width: 900px; margin: 0 auto;}header{background: rgb(20, 20, 20); padding: 10px; \
+  color: white; -ms-flex-line-pack: center; align-content: center; -webkit-box-shadow: \
+  0 8px 6px -6px black; box-shadow: 0 8px 6px -6px black; -webkit-box-flex: 0; \
+  -ms-flex-positive: 0; flex-grow: 0;}header div{display: -webkit-box; display: \
+  -ms-flexbox; display: flex; -ms-flex-pack: distribute; justify-content: space-around;}\
+  a:link, a:visited{text-decoration: none; color: white; cursor: pointer;}.logo{font-weight: \
+  200; display: inline-block; cursor: pointer; font-style: italic; font-size: 25px;}\
+  .switchboard{-webkit-box-flex: 1; -ms-flex-positive: 1; flex-grow: 1; display: -webkit-box; \
+  display: -ms-flexbox; display: flex; -webkit-box-orient: horizontal; -webkit-box-direction: \
+  normal; -ms-flex-direction: row; flex-direction: row; -webkit-box-align: center; -ms-flex-align: \
+  center; align-items: center;}.summary{display: -webkit-box; display: -ms-flexbox; display: flex; \
+  -webkit-box-orient: horizontal; -webkit-box-direction: normal; -ms-flex-direction: row; \
+  flex-direction: row; padding: 20px; -ms-flex-wrap: wrap; flex-wrap: wrap; -webkit-box-align: \
+  center; -ms-flex-align: center; align-items: center; -webkit-box-pack: center; -ms-flex-pack: \
+  center; justify-content: center;}.device{-ms-flex-preferred-size: 250px; flex-basis: 250px; \
+  background: rgba(0, 0, 0, 0.7); padding: 20px; margin: 20px; -webkit-transition: background \
+  0.25s linear; transition: background 0.25s linear; position: relative; -webkit-box-shadow: \
+  0 8px 6px -6px black; box-shadow: 0 8px 6px -6px black; cursor: pointer; color: white;}\
+  .device:hover{top: 1px; background: rgba(0, 0, 0, 0.8); -webkit-box-shadow: 0 4px 6px -6px black; \
+  box-shadow: 0 4px 6px -6px black;}.device:active{top: 4px; -webkit-box-shadow: none; \
+  box-shadow: none;}.device .name{font-size: 1.1em; pointer-events: none;}.device \
+  .pin{font-style: italic; font-size: 0.8em; margin: 10px 0px; pointer-events: none;}\
+  .nonSelectable{-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; \
+  -moz-user-select: none; -ms-user-select: none; user-select: none;}.on{background-color: \
+  rgba(255, 255, 0, 1); color: black;}.on:hover{background-color: rgba(255, 255, 0, 0.9);}\
+  h1, h2{text-align: center;}@media only screen and (max-width: 800px){.device{margin: 5px;}\
+  .summary{padding: 0px;}}@media only screen and (max-width: 650px){.device{margin: 10px 5px; \
+  -ms-flex-preferred-size: 300px; flex-basis: 300px;}.summary{padding: 0px;}}</style></head><body> \
+  <div id='loader'> <span> <span class='logo'>nodemcu |</span> <span>loading...</span> </span> \
+  </div><header> <div class='container nonSelectable'> <a href=\"/\"><span> <span class='logo'>\
+  nodemcu |</span> <span>control panel</span> </span></a> </div></header> <section class='container \
+  switchboard'> <div class='summary' id='pins'></div></section></body><script type='text/javascript'> \
+  getPinState=new Promise( ((resolve, reject)=>{fetch('/status').then(res=>{if (res.status !==200) \
+  throw new Error (res.status); else resolve(res.json())}).catch(err=> reject('An error occured while \
+  fetching data'))}) ); function addDevices(pinState){let str=''; pinState.forEach(pin=>{str +='<span \
+  class=\"device '; str +=(pin.pinStatus==1)?\"on\":\"\"; str +='\" pinno='+ pin.pinNumber +'><div \
+  class=\"name nonSelectable\">' + pin.deviceName + '</div><div class=\"pin nonSelectable\">GPIO<span \
+  class=\"no\">' + pin.pinNumber + '</span></div></span>';}); document.getElementById('pins')\
+  .innerHTML=str;}function changePinState(pinEle){let sendArgs='pinNumber='+Number(pinEle.getAttribute\
+  ('pinno'))+\"&state=\"; sendArgs +=pinEle.classList.contains('on')?0:1; fetch('/status',{method: 'POST', \
+  body: sendArgs, headers:{'Content-Type' : 'application/x-www-form-urlencoded'}}).then((res)=>{if \
+  (res.status !==200) throw new Error (res.status);}).catch(()=>{error();}); pinEle.classList.toggle\
+  ('on');}function error(){document.getElementById('loader').innerHTML='<span><h2>Error occured while \
+  communicating to nodemcu.<h3><br><h1>RELOADING</h3></span>'; document.getElementById('loader').style\
+  .display='flex'; window.setInterval(()=>{location.reload();}, 1000);}window.onload=()=>{getPinState\
+  .then(pinState=>{addDevices(pinState); document.getElementById('loader').style.display='none';})\
+  .catch(err=>{error();}); document.addEventListener('click',function(e){if(e.target && e.target\
+  .classList.contains('device')){changePinState(e.target);}});}</script></html>";
   server.send(200, "text/html", page);
   Serial.println("Response Sent");
 }
@@ -241,18 +254,22 @@ void handleChangePinStateRequest(){
 void handleNotFound(){
   Serial.println("Recieved GET request to undefined path... ");
   // the html webpage for when path not found
-  String errorPageHTML="<!DOCTYPE html><html lang='en'><head> <meta charset='UTF-8'>\
-  <meta name='viewport' content='width=device-width, initial-scale=1.0'>\
-  <meta http-equiv='X-UA-Compatible' content='ie=edge'> <title>ESP8266 IOT ERROR 404</title>\
-  <style>html, body, #fullheight{min-height: 100% !important; height: 100%;\
-  padding: 0; margin: 0;}body{background: #000428; background: -webkit-linear-gradient\
-  (to right, #004e92, #000428); background: linear-gradient(to right, #004e92, #000428);\
-  color: white; display: flex; justify-content: center; align-items: center; flex-direction:\
-  column; font-family: Helvetica, Arial, sans-serif;}button{background-color: #4CAF50;\
-  border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none;\
-  display: inline-block; font-size: 16px; cursor: pointer;}</style></head><body>\
-  <h1 style='font-size:3.5em;'>4 0 4</h1> <h2 style='font-weight: 100; margin: 10px;'>\
-  The requested page cound not be found.</h2> <br><a href='/'><button>Go Home</button></a></body></html>";
+  String errorPageHTML="<!DOCTYPE html><html lang='en'><head> <meta charset='UTF-8'> \
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'> <meta \
+  http-equiv='X-UA-Compatible' content='ie=edge'> <title>nodemcu 404</title> \
+  <style>html, body, #fullheight{min-height: 100% !important; height: 100%; padding: 0; \
+  margin: 0;}body{background: #252525; color: white; display: -webkit-box; display: \
+  -ms-flexbox; display: flex; -webkit-box-pack: center; -ms-flex-pack: center; \
+  justify-content: center; -webkit-box-align: center; -ms-flex-align: center; \
+  align-items: center; -webkit-box-orient: vertical; -webkit-box-direction: normal; \
+  -ms-flex-direction: column; flex-direction: column; font-family: Helvetica, Arial, \
+  sans-serif;}button{background-color: #4CAF50; border: none; color: white; padding: \
+  10px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: \
+  16px; cursor: pointer; border-radius: 7px; -webkit-box-shadow: 0 5px 6px -6px black; \
+  box-shadow: 0 5px 6px -6px black; position: relative; outline: none;}button:active{top: \
+  2px; background-color: rgb(60, 131, 62);}</style></head><body> <h1 style='font-size:3.5em;'>\
+  4 0 4</h1> <h2 style='font-weight: 100; margin: 10px;'>The requested page cound not be found.\
+  </h2> <br><a href='/'><button>Go Home</button></a></body></html>";
   // send response
   server.send(404, "text/html", errorPageHTML);
   Serial.println("Response Sent");
