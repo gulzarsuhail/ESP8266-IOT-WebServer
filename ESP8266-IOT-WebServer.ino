@@ -8,8 +8,8 @@
  * These credentials will be used to connect to the WiFi.
  */
 #ifndef STASSID
-#define STASSID "Zzzz"
-#define STAPSK  "qazwsxedc111"
+#define STASSID "your_wifi_ssid"          // #CONFIG
+#define STAPSK  "your_wifi_password"      // #CONFIG
 #endif
 const char* ssid = STASSID;
 const char* password = STAPSK;
@@ -18,7 +18,7 @@ const char* password = STAPSK;
  * The number of relays connected to nodemcu.
  * The number must be in the range 1 to 8
  */
-#define RELAY_COUNT 8
+#define RELAY_COUNT 8                     // #CONFIG
 
 /* 
  * Eight pins in this sketch are used for controlling relays.
@@ -40,7 +40,7 @@ const int relayPINS[8] = {5,4,0,14,12,13,15,3}; // {D1, D2, D3, D5, D6, D7, D8, 
  * (defined below), second element in relayPINS array (defined above)
  *  will the second device name in the deviceName array, and so on.
  */
-const String deviceName[8] = {
+const String deviceName[8] = {          // #CONFIG (not necessary)
   "Device_1",
   "Device_2",
   "Device_3",
@@ -215,6 +215,7 @@ void handleRoot(){
   .then(pinState=>{addDevices(pinState); document.getElementById('loader').style.display='none';})\
   .catch(err=>{error();}); document.addEventListener('click',function(e){if(e.target && e.target\
   .classList.contains('device')){changePinState(e.target);}});}</script></html>";
+  // send back the webpage
   server.send(200, "text/html", page);
   Serial.println("Response Sent");
 }
