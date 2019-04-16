@@ -6,17 +6,22 @@ To get the webserver running, you need to configure the lines marked  with #CONF
 
 Set up your wifi SSID and password in the lines 
 
-```#define STASSID "your_wifi_ssid"
-#define STAPSK  "your_wifi_password"```
+```
+#define STASSID "your_wifi_ssid"
+#define STAPSK  "your_wifi_password"
+```
 
 Set up the number of relays connected to your nodemcu. The minimum number is 1 and the maximum is 8. Set the number in line
 
-```#define RELAY_COUNT 8```
+```
+#define RELAY_COUNT 8
+```
 
 You can set up the device name in the array named deviceName. Even though the array contains eight strings, you can change only the number of strings you defined as RELAY_COUNT.
 For example, if four devices are connected, then RELAY_COUNT should be set up as 4 and deviceName array should be configured as
 
-```const String deviceName[8] = {
+```
+const String deviceName[8] = {
   "Kitchen Lamp",
   "Toaster",
   "Microwave",
@@ -25,7 +30,8 @@ For example, if four devices are connected, then RELAY_COUNT should be set up as
   "Device_6",
   "Device_7",
   "Device_8"
-};```
+};
+```
 
 By default, the above devices must be connected in the following order
 
