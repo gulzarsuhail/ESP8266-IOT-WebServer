@@ -50,7 +50,7 @@ After the config is complete, upload the code to your nodemcu and connect the wi
 
 # Usage
 
-You can get to the webinterface via the nodemcu local address http://esp8266.local/status or the local IP address e.g, http://192.168.1.4
+You can get to the webinterface via the nodemcu local address http://esp8266.local or the local IP address e.g, http://192.168.1.4
 
 # API
 
